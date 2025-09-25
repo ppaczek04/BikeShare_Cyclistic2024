@@ -25,6 +25,7 @@ BEGIN
 		PRINT '>> JANUARY Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------FEBRUARY DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202402-divvy-tripdata.csv'
@@ -37,6 +38,7 @@ BEGIN
 		PRINT '>> FEBRUARY Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------MARCH DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202403-divvy-tripdata.csv'
@@ -49,6 +51,7 @@ BEGIN
 		PRINT '>> MARCH Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------APRIL DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202404-divvy-tripdata.csv'
@@ -61,6 +64,7 @@ BEGIN
 		PRINT '>> APRIL Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------MAY DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202405-divvy-tripdata.csv'
@@ -73,6 +77,7 @@ BEGIN
 		PRINT '>> MAY Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------JUNE DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202406-divvy-tripdata.csv'
@@ -85,6 +90,7 @@ BEGIN
 		PRINT '>> JUNE Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------JULY DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202407-divvy-tripdata.csv'
@@ -97,6 +103,7 @@ BEGIN
 		PRINT '>> JULY Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------AUGUST DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202408-divvy-tripdata.csv'
@@ -109,6 +116,7 @@ BEGIN
 		PRINT '>> AUGUST Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------SEPTEMBER DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202409-divvy-tripdata.csv'
@@ -121,6 +129,7 @@ BEGIN
 		PRINT '>> SEPTEMBER Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------OCTOBER DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202410-divvy-tripdata.csv'
@@ -133,6 +142,7 @@ BEGIN
 		PRINT '>> OCTOBER Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------NOVEMBER DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202411-divvy-tripdata.csv'
@@ -145,6 +155,7 @@ BEGIN
 		PRINT '>> NOVEMBER Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
 
+		SET @start_time = GETDATE();
         PRINT '---------DECEMBER DATA---------'
 		BULK INSERT raw_data.trips_flat_table
 		FROM 'C:\Users\DELL\Desktop\BikeShare_Cyclistic2024\data\data_raw\202412-divvy-tripdata.csv'
