@@ -7,7 +7,7 @@ GO
 -- Create Schemas
 CREATE SCHEMA raw_data;
 GO
-CREATE SCHEMA cleared_data;
+CREATE SCHEMA cleaned_data;
 GO
 
 
@@ -34,11 +34,11 @@ CREATE TABLE raw_data.trips_raw (
 
 
 -- Create a table for cleared data
-IF OBJECT_ID('cleared_data.trips_cleaned','U') IS NOT NULL
-    DROP TABLE cleared_data.trips_cleaned;
+IF OBJECT_ID('cleaned_data.trips_cleaned','U') IS NOT NULL
+    DROP TABLE cleaned_data.trips_cleaned;
 GO
 
-CREATE TABLE cleared_data.trips_cleaned (
+CREATE TABLE cleaned_data.trips_cleaned (
     ride_id            nvarchar(64) PRIMARY KEY,
     rideable_type      nvarchar(20),
     started_at         datetime2(0),    -- accuracy to seconds
@@ -62,8 +62,3 @@ CREATE TABLE cleared_data.trips_cleaned (
     is_roundtrip       bit
 );
 
--- Create an indexes for faster analysis/filtering of clearfed data
-CREATE INDEX IX_trips_member   ON cleared_data.trips_cleaned(member_casual);
-CREATE INDEX IX_trips_date     ON cleared_data.trips_cleaned(ride_date);
-CREATE INDEX IX_trips_startsid ON cleared_data.trips_cleaned(start_station_id);
-CREATE INDEX IX_trips_endsid   ON cleared_data.trips_cleaned(end_station_id);

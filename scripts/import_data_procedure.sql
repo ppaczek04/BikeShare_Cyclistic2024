@@ -164,6 +164,10 @@ BEGIN
 			FIELDTERMINATOR = ',',
 			TABLOCK
 		);
+
+		-- no need to create indexes for trips_raw as its not going to be used for analysis
+		-- its purpose is to just store raw data in case of need of running data backup
+
 		SET @end_time = GETDATE();
 		PRINT '>> DECEMBER Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + ' seconds';
 		PRINT '------------------------------';
