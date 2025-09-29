@@ -1,3 +1,4 @@
+-- VERSION OF CLEAR_DATA_PROCEDURE WITHOUT USAGE OF CROSS APPLY
 CREATE OR ALTER PROCEDURE cleaned_data.load_clean_data AS
 BEGIN
 	DECLARE @batch_start_time DATETIME, @batch_end_time DATETIME; 
@@ -104,21 +105,6 @@ BEGIN
 			FROM raw_data.trips_raw
 			WHERE ride_id IS NOT NULL
 		) t
-        -- cross apply so that i can use parsed (to correct type) data in where clauses,
-        -- also, now the conversion happens only in cross apply, not in outer select and in where clause
-        CROSS APPLY (
-            SELECT
-                TRY_CONVERT(datetime2(0), t.started_at) AS start_dt,
-                TRY_CONVERT(datetime2(0), t.ended_at)   AS end_dt,
-                TRY_CONVERT(decimal(9,6), t.start_lat)  AS start_lat_num,
-                TRY_CONVERT(decimal(9,6), t.start_lng)  AS start_lng_num,
-                TRY_CONVERT(decimal(9,6), t.end_lat)    AS end_lat_num,
-                TRY_CONVERT(decimal(9,6), t.end_lng)    AS end_lng_num,
-                DATEDIFF(SECOND,
-                    TRY_CONVERT(datetime2(0), t.started_at),
-                    TRY_CONVERT(datetime2(0), t.ended_at)
-                ) AS ride_seconds
-        ) x
         -- COLUMNS *** in where are taken from t. query (so from inside of from query)
 		WHERE flag_last = 1 -- Select the most recent record per trip
         AND started_at < ended_at -- start of trip reocded before end of trip

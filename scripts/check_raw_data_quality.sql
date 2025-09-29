@@ -78,7 +78,7 @@ FROM raw_data.trips_raw
 GROUP BY start_station_id
 HAVING COUNT(DISTINCT start_lat) > 1 OR COUNT(DISTINCT start_lng) > 1;
 
------------- STACJE CO MAJA PO KILKA LAT,LONG PUNKTOW
+------------ STATIONS THAT HAVE MULTIPLE LAT/LONG COORDINATES
 
 
 SELECT end_lat, end_lng, COUNT(*) AS rides
