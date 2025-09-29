@@ -1,3 +1,26 @@
+/*===============================================================
+ Procedure: cleaned_data.load_clean_data
+ Purpose  : Cleans and transforms raw trip data into a curated form,
+            ready for analytics and reporting (CLEANED layer).
+ 
+ Key Cleaning Rules:
+   - Remove duplicate ride_ids (keep latest ended_at).
+   - Convert timestamps to datetime2, lat/long to decimal.
+   - Enforce trip duration (60 sec – 24h).
+   - Keep only trips within Chicago coordinates.
+   - Standardize categorical fields (rideable_type, member_casual).
+   - Derive enrichment columns: ride_seconds, ride_minutes,
+     ride_date, weekday_name/num, season, is_roundtrip.
+
+ Index Handling:
+   - Nonclustered indexes are dropped before load (faster insert).
+   - Recreated after load to support analysis queries.
+
+ Note:
+   Cleaned layer guarantees consistent datatypes,
+   valid ranges, and enriched attributes for BI tools.
+===============================================================*/
+
 CREATE OR ALTER PROCEDURE cleaned_data.load_clean_data AS
 BEGIN
 	DECLARE @batch_start_time DATETIME, @batch_end_time DATETIME; 
@@ -49,29 +72,29 @@ BEGIN
                 ELSE NULL
             END AS rideable_type,
             --  start and end time reduced to seconds, no need for miliseconds accuracy
-            TRY_CONVERT(datetime2(0), t.started_at) AS started_at,
-            TRY_CONVERT(datetime2(0), t.ended_at)   AS ended_at,
+            x.x_started_at AS started_at,
+            x.x_ended_at   AS ended_at,
             NULLIF(t.start_station_name,'') AS start_station_name,
             NULLIF(t.start_station_id  ,'') AS start_station_id,
             NULLIF(t.end_station_name  ,'') AS end_station_name,
             NULLIF(t.end_station_id    ,'') AS end_station_id,
             -- lattidtue and lengtittude with accuracy to 6 decimal places
-            TRY_CONVERT(decimal(9,6), t.start_lat) AS start_lat,
-            TRY_CONVERT(decimal(9,6), t.start_lng) AS start_lng,
-            TRY_CONVERT(decimal(9,6), t.end_lat)   AS end_lat,
-            TRY_CONVERT(decimal(9,6), t.end_lng)   AS end_lng,
+            x.x_start_lat AS start_lat,
+            x.x_start_lng AS start_lng,
+            x.x_end_lat   AS end_lat,
+            x.x_end_lng   AS end_lng,
             CASE LOWER(t.member_casual)
                 WHEN 'member' THEN 'member'
                 WHEN 'casual' THEN 'casual'
                 ELSE NULL
             END AS member_casual,
             -- data enrichment, adding cols with time calculated, week name etc.
-            DATEDIFF(SECOND, TRY_CONVERT(datetime2(0), t.started_at), TRY_CONVERT(datetime2(0), t.ended_at))        AS ride_seconds,
-            DATEDIFF(SECOND, TRY_CONVERT(datetime2(0), t.started_at), TRY_CONVERT(datetime2(0), t.ended_at)) / 60.0 AS ride_minutes,
-            CAST(TRY_CONVERT(datetime2(0), t.started_at) AS date)                                                   AS ride_date,
-            DATENAME(WEEKDAY, TRY_CONVERT(datetime2(0), t.started_at))                                              AS weekday_name,
-            DATEPART(WEEKDAY, TRY_CONVERT(datetime2(0), t.started_at))                                              AS weekday_num,
-            CASE DATEPART(MONTH, TRY_CONVERT(datetime2(0), t.started_at))
+            x.x_ride_seconds AS ride_seconds,
+            x.x_ride_seconds / 60.0 AS ride_minutes,
+            CAST(x.x_started_at AS date)                                                   AS ride_date,
+            DATENAME(WEEKDAY, x.x_started_at)                                            AS weekday_name,
+            DATEPART(WEEKDAY, x.x_started_at)                                            AS weekday_num,
+            CASE DATEPART(MONTH, x.x_started_at)
                 WHEN 12 THEN 'winter' WHEN 1 THEN 'winter' WHEN 2 THEN 'winter'
                 WHEN 3  THEN 'spring' WHEN 4 THEN 'spring' WHEN 5 THEN 'spring'
                 WHEN 6  THEN 'summer' WHEN 7 THEN 'summer' WHEN 8 THEN 'summer'
@@ -108,31 +131,31 @@ BEGIN
         -- also, now the conversion happens only in cross apply, not in outer select and in where clause
         CROSS APPLY (
             SELECT
-                TRY_CONVERT(datetime2(0), t.started_at) AS start_dt,
-                TRY_CONVERT(datetime2(0), t.ended_at)   AS end_dt,
-                TRY_CONVERT(decimal(9,6), t.start_lat)  AS start_lat_num,
-                TRY_CONVERT(decimal(9,6), t.start_lng)  AS start_lng_num,
-                TRY_CONVERT(decimal(9,6), t.end_lat)    AS end_lat_num,
-                TRY_CONVERT(decimal(9,6), t.end_lng)    AS end_lng_num,
+                TRY_CONVERT(datetime2(0), t.started_at) AS x_started_at,
+                TRY_CONVERT(datetime2(0), t.ended_at)   AS x_ended_at,
+                TRY_CONVERT(decimal(9,6), t.start_lat)  AS x_start_lat,
+                TRY_CONVERT(decimal(9,6), t.start_lng)  AS x_start_lng,
+                TRY_CONVERT(decimal(9,6), t.end_lat)    AS x_end_lat,
+                TRY_CONVERT(decimal(9,6), t.end_lng)    AS x_end_lng,
                 DATEDIFF(SECOND,
                     TRY_CONVERT(datetime2(0), t.started_at),
                     TRY_CONVERT(datetime2(0), t.ended_at)
-                ) AS ride_seconds
+                ) AS x_ride_seconds
         ) x
         -- COLUMNS *** in where are taken from t. query (so from inside of from query)
-		WHERE flag_last = 1 -- Select the most recent record per trip
-        AND started_at < ended_at -- start of trip reocded before end of trip
-        AND started_at >= '2024-01-01' AND started_at < '2025-01-01' -- data from 2024
-        AND DATEDIFF(SECOND, TRY_CONVERT(datetime2(0), t.started_at), TRY_CONVERT(datetime2(0), t.ended_at)) BETWEEN 60 and 86400 -- ride lasted between 60 sec and 24h
+		WHERE t.flag_last = 1 -- Select the most recent record per trip
+        AND x.x_started_at < x.x_ended_at -- start of trip reocded before end of trip
+        AND x.x_started_at >= '2024-01-01' AND x.x_started_at < '2025-01-01' -- data from 2024
+        AND x.x_ride_seconds BETWEEN 60 and 86400 -- ride lasted between 60 sec and 24h
 
-        AND start_lat BETWEEN 41.0 AND 42.5 -- coordinates for Chicago city 
-        AND start_lng BETWEEN -88.0 AND -87.0
-        AND end_lat   BETWEEN 41.0 AND 42.5
-        AND end_lng   BETWEEN -88.0 AND -87.0
+        AND x.x_start_lat BETWEEN 41.0 AND 42.5 -- coordinates for Chicago city 
+        AND x.x_start_lng BETWEEN -88.0 AND -87.0
+        AND x.x_end_lat   BETWEEN 41.0 AND 42.5
+        AND x.x_end_lng   BETWEEN -88.0 AND -87.0
 
         -- dictionaries (data standarisation)
-        AND t.rideable_type IN ('classic_bike','electric_bike','electric_scooter')
-        AND t.member_casual IN ('member','casual');
+        AND LOWER(t.rideable_type) IN ('classic_bike','electric_bike','electric_scooter')
+        AND LOWER(t.member_casual) IN ('member','casual');
         -- COLUMNS ***
 
         -- after inserting all the data we bring back the indexes

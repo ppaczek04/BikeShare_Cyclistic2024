@@ -1,3 +1,19 @@
+/*===============================================================
+ Procedure: raw_data.load_raw_data
+ Purpose  : Loads monthly CSV trip files into the raw_data schema.
+            This is a staging step (RAW layer), before any cleaning
+            or validation is applied.
+ 
+ Key Steps:
+   - Truncate the existing raw_data table.
+   - Bulk insert rows from all monthly CSV files.
+   - Keep original formatting (strings, quotes, etc.) untouched.
+ 
+ Note:
+   The raw layer acts as a "landing zone" for data.
+   It preserves the source in its most original state.
+===============================================================*/
+
 CREATE OR ALTER PROCEDURE raw_data.load_raw_data AS
 BEGIN
 	DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME; 
