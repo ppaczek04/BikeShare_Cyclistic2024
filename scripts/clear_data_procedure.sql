@@ -158,6 +158,78 @@ BEGIN
         AND LOWER(t.member_casual) IN ('member','casual');
         -- COLUMNS ***
 
+        /* ===== Normalize station_id by station_name (canonical IDs) ===== */
+        PRINT '>> Normalizing station_id values based on station_name...';
+
+        -- create a start_map: for each start_station_name choose the most popular start_station_id
+        IF OBJECT_ID('tempdb..#start_map') IS NOT NULL DROP TABLE #start_map;
+        WITH start_counts AS (
+            SELECT start_station_name, start_station_id, COUNT(*) AS cnt
+            FROM cleaned_data.trips_cleaned
+            WHERE start_station_name IS NOT NULL AND start_station_id IS NOT NULL
+            GROUP BY start_station_name, start_station_id
+        ),
+        pick AS (
+            SELECT
+                start_station_name,
+                start_station_id,
+                ROW_NUMBER() OVER (
+                    PARTITION BY start_station_name
+                    ORDER BY cnt DESC, start_station_id
+                ) AS rn
+            FROM start_counts
+        )
+        SELECT
+            start_station_name,
+            start_station_id AS canonical_start_id
+        INTO #start_map
+        FROM pick
+        WHERE rn = 1;
+
+        -- create an end_map: for each end_station_name choose the most popular end_station_id
+        IF OBJECT_ID('tempdb..#end_map') IS NOT NULL DROP TABLE #end_map;
+        WITH end_counts AS (
+            SELECT end_station_name, end_station_id, COUNT(*) AS cnt
+            FROM cleaned_data.trips_cleaned
+            WHERE end_station_name IS NOT NULL AND end_station_id IS NOT NULL
+            GROUP BY end_station_name, end_station_id
+        ),
+        pick AS (
+            SELECT
+                end_station_name,
+                end_station_id,
+                ROW_NUMBER() OVER (
+                    PARTITION BY end_station_name
+                    ORDER BY cnt DESC, end_station_id
+                ) AS rn
+            FROM end_counts
+        )
+        SELECT
+            end_station_name,
+            end_station_id AS canonical_end_id
+        INTO #end_map
+        FROM pick
+        WHERE rn = 1;
+
+        -- update start_station_id when it differs from most popular start_station_id
+        UPDATE c
+        SET c.start_station_id = sm.canonical_start_id
+        FROM cleaned_data.trips_cleaned AS c
+        JOIN #start_map AS sm
+        ON sm.start_station_name = c.start_station_name
+        WHERE c.start_station_id IS NULL OR c.start_station_id <> sm.canonical_start_id;
+
+        -- update end_station_id when it differs from most popular end_station_id
+        UPDATE c
+        SET c.end_station_id = em.canonical_end_id
+        FROM cleaned_data.trips_cleaned AS c
+        JOIN #end_map AS em
+        ON em.end_station_name = c.end_station_name
+        WHERE c.end_station_id IS NULL OR c.end_station_id <> em.canonical_end_id;
+
+        PRINT '>> Station_id normalization completed successfully.';
+        /* ===== End normalization ===== */
+
         -- after inserting all the data we bring back the indexes
         CREATE INDEX IX_trips_member   ON cleaned_data.trips_cleaned(member_casual);
         CREATE INDEX IX_trips_date     ON cleaned_data.trips_cleaned(ride_date);
