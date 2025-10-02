@@ -24,3 +24,17 @@ SELECT rideable_type,
 FROM cleaned_data.trips_cleaned
 GROUP BY rideable_type;
 
+-- Count how many distinct station_ids are linked to each station_name
+WITH StationNameIdPairs AS (
+    SELECT DISTINCT
+        start_station_name,
+        start_station_id
+    FROM cleaned_data.trips_cleaned
+)
+SELECT
+    start_station_name,
+    COUNT(*) AS distinct_station_id_count
+FROM StationNameIdPairs
+GROUP BY start_station_name
+ORDER BY distinct_station_id_count DESC;
+

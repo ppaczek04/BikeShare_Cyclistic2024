@@ -55,6 +55,7 @@ CREATE TABLE cleaned_data.trips_cleaned (
     ride_seconds       int,
     ride_minutes       decimal(10,2),
     ride_date          date,
+    start_hour         tinyint,
     weekday_name       nvarchar(20),
     weekday_num        tinyint,
     -- year_month         char(7),         -- np. "2024-06"

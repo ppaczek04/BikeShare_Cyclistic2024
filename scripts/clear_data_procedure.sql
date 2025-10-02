@@ -58,6 +58,7 @@ BEGIN
             ride_seconds, 
             ride_minutes, 
             ride_date,
+            start_hour,
             weekday_name, 
             weekday_num, 
             season, 
@@ -91,7 +92,8 @@ BEGIN
             -- data enrichment, adding cols with time calculated, week name etc.
             x.x_ride_seconds AS ride_seconds,
             x.x_ride_seconds / 60.0 AS ride_minutes,
-            CAST(x.x_started_at AS date)                                                   AS ride_date,
+            CAST(x.x_started_at AS date)                                                 AS ride_date,
+            DATEPART(HOUR, x.x_started_at)                      AS start_hour,   
             DATENAME(WEEKDAY, x.x_started_at)                                            AS weekday_name,
             DATEPART(WEEKDAY, x.x_started_at)                                            AS weekday_num,
             CASE DATEPART(MONTH, x.x_started_at)
