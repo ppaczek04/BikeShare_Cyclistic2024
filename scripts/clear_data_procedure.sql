@@ -95,7 +95,7 @@ BEGIN
             CAST(x.x_started_at AS date)                                                 AS ride_date,
             DATEPART(HOUR, x.x_started_at)                      AS start_hour,   
             DATENAME(WEEKDAY, x.x_started_at)                                            AS weekday_name,
-            DATEPART(WEEKDAY, x.x_started_at)                                            AS weekday_num,
+            ((DATEPART(WEEKDAY, x.x_started_at) + @@DATEFIRST - 2) % 7) + 1              AS weekday_num,
             CASE DATEPART(MONTH, x.x_started_at)
                 WHEN 12 THEN 'winter' WHEN 1 THEN 'winter' WHEN 2 THEN 'winter'
                 WHEN 3  THEN 'spring' WHEN 4 THEN 'spring' WHEN 5 THEN 'spring'
