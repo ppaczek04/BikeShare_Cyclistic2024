@@ -72,7 +72,7 @@ ORDER BY member_casual, start_hour;
 
 -- 5) Type of vehicle by user type
 --    Purpose: Analyze rideable preference between user types.
---    Observation (2024): Casuals prefer electric bikes/scooters,
+--    Observation (2024): Casuals prefer electric bikes/scooters in a similar level to classic bikes,
 --                        Members use more classic bikes for routine trips.
 SELECT 
     member_casual,
