@@ -59,21 +59,49 @@ Full discussion and rationale are included in the Word report.
 
 The dashboard provides interactive views of ride behavior — including trip duration, weekday and hourly trends, vehicle type usage, and seasonal variations.
 
-### Steps:
+**Steps:**
+
+1. **Download the raw data**  
+   Download monthly trip data files for **January–December 2024** from the official [Divvy Tripdata repository](https://divvy-tripdata.s3.amazonaws.com/index.html).
+
+2. **Place all files in a single folder**  
+   Store the downloaded `.csv` files in one directory on your local machine (e.g. `data/data_raw/`).
+
+3. **Adjust the import path**  
+   In the `import_raw_data_procedure.sql` file, modify the file path variable (highlighted section in the screenshot below) to point to your local folder containing the `.csv` files.
+
+   *(see image below for reference, apply for all months)*  
+   ![Import Procedure Example](img/import_path_example1.png)
+   next,
+   ![Import Procedure Example](img/import_path_example2.png)
+   and on..
+
+4. **Run the database initialization script**
+
+   In your SQL environment (e.g. SQL Server Management Studio):  
+   - Open the file **`init_database.sql`**  
+   - Execute the full script to create the **BikeShare** database, required schemas (`raw_data`, `cleaned_data`), and base tables.  
+   ⚙️ *This step is only required once, when setting up the environment.*
+
+5. **Run scripts that prepare data**
+
+   After the database is created, execute the following stored procedures to load and clean data:
+
+   ```sql
+   EXEC import_raw_data;   -- Imports monthly CSV files into raw_data.trips_raw
+   EXEC clean_data;        -- Cleans and standardizes data into cleaned_data.trips_cleaned
+    ```
+    ⚙️ *This step can be redone tu update data if something in csv files changes*
+    
+**Final steps:**
 1. Download and open **`Cyclistic_dashboard.pbit`** in **Power BI Desktop**.  
-2. When prompted, connect to your dataset (table: `cleaned_data.trips_cleaned`).  
-3. Verify that the column names and data types match those used in the SQL script.  
+2. When prompted, connect to your dataset/SQL Envirnonment (table: `cleaned_data.trips_cleaned`).  
+3. Verify that the column names and data types match those used in the SQL script (it should be 1:1 match, but if visuals still don't work after step 4. verify this) 
 4. Click **Refresh** to load visuals.  
 5. Use the available slicers to filter by:
    - `member_casual` (user type)  
    - `rideable_type` (bike type)  
    - `month` or `season`  
-
-The dashboard includes views such as:
-- Monthly ride intensity  
-- Ride distribution by weekday and hour  
-- Average and median ride duration  
-- Top start and end stations  
 
 ---
 
